@@ -10,8 +10,12 @@ import Foundation
 import Logging
 
 extension AppStore {
-    enum AuthenticationError: Error {
+    enum AuthenticationError: LocalizedError {
         case accountNotFound
+
+        var errorDescription: String? {
+            String(localized: "The selected account no longer exists. Add it again to continue.")
+        }
     }
 
     @MainActor
@@ -23,13 +27,13 @@ extension AppStore {
                 password: password,
                 code: code,
                 guid: deviceIdentifier,
-                cookies: [],
+                cookies: []
             )
             let userAccount = save(email: email, account: appleAccount)
             logger.info("authentication successful for user")
             return userAccount
         } catch {
-            logger.error("authentication failed for user: \(error.localizedDescription)")
+            logger.error("authentication failed: \(StoreDiagnostics.errorSummary(error))")
             throw error
         }
     }
@@ -37,9 +41,9 @@ extension AppStore {
     @MainActor
     @discardableResult
     func rotate(id: UserAccount.ID) async throws -> UserAccount? {
-        logger.info("starting account rotation for user id: \(id)")
+        logger.info("starting account rotation")
         guard let account = accounts.first(where: { $0.id == id }) else {
-            logger.error("account not found for rotation, id: \(id)")
+            logger.error("account not found for rotation")
             throw AuthenticationError.accountNotFound
         }
         do {
@@ -48,13 +52,13 @@ extension AppStore {
                 password: account.account.password,
                 code: "",
                 guid: deviceIdentifier,
-                cookies: account.account.cookie,
+                cookies: account.account.cookie
             )
             let updatedAccount = save(email: account.account.email, account: newAppleAccount)
-            logger.info("account rotation successful for user id: \(id)")
+            logger.info("account rotation successful")
             return updatedAccount
         } catch {
-            logger.error("account rotation failed for user id: \(id): \(error.localizedDescription)")
+            logger.error("account rotation failed: \(StoreDiagnostics.errorSummary(error))")
             throw error
         }
     }
