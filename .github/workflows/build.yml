@@ -1,4 +1,4 @@
-name: Build App
+name: Build Local SAP App
 
 on:
   push:
@@ -11,8 +11,11 @@ jobs:
     runs-on: macos-26
 
     steps:
-      - name: Checkout
+      - name: Checkout pinned local SAP source
         uses: actions/checkout@v4
+        with:
+          repository: CloudOfEquality/Asspp
+          ref: 1ceff04110acc457c6423c87500a08fdbb9c1844
 
       - name: Select newest non-beta Xcode
         run: |
@@ -70,8 +73,11 @@ jobs:
     runs-on: macos-26
 
     steps:
-      - name: Checkout
+      - name: Checkout pinned local SAP source
         uses: actions/checkout@v4
+        with:
+          repository: CloudOfEquality/Asspp
+          ref: 1ceff04110acc457c6423c87500a08fdbb9c1844
 
       - name: Select newest non-beta Xcode
         run: |
