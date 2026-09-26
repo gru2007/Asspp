@@ -94,7 +94,7 @@ class AppStore {
     }
 
     func delete(id: UserAccount.ID) {
-        logger.info("deleting account id: \(id)")
+        logger.info("deleting account")
         accounts = accounts.filter { $0.id != id }
     }
 
@@ -110,16 +110,18 @@ class AppStore {
         guard var account = await accounts.first(where: { $0.id == id }) else {
             throw AuthenticationError.accountNotFound
         }
+        let originalAccount = account.account
         // Migrate cookies saved by the first SAP release before any store request.
         // This also covers download, version history and license requests.
         account.normalizeStoreCookies()
         let result = try await body(&account)
         account.normalizeStoreCookies()
         let updatedAccount = account
+        // Do not overwrite a concurrent login/rotation with this older session.
         // Re-resolve by id: the accounts array may have been mutated (added,
         // removed, re-sorted) during the await, so the original index is stale.
         await MainActor.run {
-            if let idx = accounts.firstIndex(where: { $0.id == id }) {
+            if let idx = accounts.firstIndex(where: { $0.id == id }), accounts[idx].account == originalAccount {
                 accounts[idx] = updatedAccount
             }
         }
