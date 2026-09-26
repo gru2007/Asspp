@@ -1,4 +1,4 @@
-name: Build App
+name: Build Local SAP App
 
 on:
   push:
@@ -11,8 +11,11 @@ jobs:
     runs-on: macos-26
 
     steps:
-      - name: Checkout
+      - name: Checkout pinned local SAP source
         uses: actions/checkout@v4
+        with:
+          repository: CloudOfEquality/Asspp
+          ref: 1ceff04110acc457c6423c87500a08fdbb9c1844
 
       - name: Select newest non-beta Xcode
         run: |
@@ -45,6 +48,11 @@ jobs:
       - name: Ensure iOS platform is installed
         run: xcodebuild -downloadPlatform iOS || true
 
+      - name: Prepare native build tools
+        run: |
+          command -v cmake >/dev/null || brew install cmake
+          command -v xcbeautify >/dev/null || brew install xcbeautify
+
       - name: Install Procursus
         uses: dhinakg/procursus-action@main
         with:
@@ -65,8 +73,11 @@ jobs:
     runs-on: macos-26
 
     steps:
-      - name: Checkout
+      - name: Checkout pinned local SAP source
         uses: actions/checkout@v4
+        with:
+          repository: CloudOfEquality/Asspp
+          ref: 1ceff04110acc457c6423c87500a08fdbb9c1844
 
       - name: Select newest non-beta Xcode
         run: |
@@ -95,6 +106,11 @@ jobs:
           echo "Selected Xcode $best_ver at $best_path"
           sudo xcode-select -s "$best_path"
           xcodebuild -version
+
+      - name: Prepare native build tools
+        run: |
+          command -v cmake >/dev/null || brew install cmake
+          command -v xcbeautify >/dev/null || brew install xcbeautify
 
       - name: Install Procursus
         uses: dhinakg/procursus-action@main
